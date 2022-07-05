@@ -26,48 +26,57 @@ username = user.data.username
 name = user.data.name
 query = 'from:{} -is.retweet -is.reply'.format(twit_user_id) #filters out retweets and replies from twitter account
 storage = 'newest_tweet_id.txt'
+
 tweets = auth.search_recent_tweets(
     query = query,
     max_results = 100
 )
-max_recency_tweet_id = tweets.data[0].id
-    
+
+max_recency_tweet_id = tweets.data[0].text
+
 def get_newest_id(storage):
     if os.stat(storage).st_size == 0: #checks if storage file is empty
-        set_newest_id(max_recency_tweet_id,storage) #runs set_newest_id() function to input information in storage file
-    read = open(storage, 'r')
-    newest_id = int(read.read().strip())
-    read.close()
-    return newest_id
+        newest_id = max_recency_tweet_id #sets newest_id to the tweet id with the maximum recency as calculated above
+        return newest_id
+    else:
+        read = open(storage, 'r')
+        newest_id = int(read.read().strip())
+        read.close()
+        return newest_id
 
-def set_newest_id(max_id, storage):
+#saves newest_id to the storage file for record-keeping purposes and to be used in the next query
+def set_newest_id(newest_id, storage):
     write = open(storage, 'w')
-    write.write(str(max_id))
+    write.write(str(newest_id))
     write.close()
     return
 
 
 def notif():
-    latest_id = get_newest_id(storage)
+    newest_id = get_newest_id(storage)
     most_recent_tweets = auth.search_recent_tweets(
         query = query,
-        since_id = latest_id #only pulls tweets that are newer than the previously newest tweet
+        since_id = newest_id,
+        max_results = 100 #only pulls tweets that are newer than the previously newest tweet
     )
 
-    for r in most_recent_tweets:
-        latest_id = r[0].id
-        set_newest_id(latest_id, storage)
+    for r in most_recent_tweets.data:
+        newest_id = r.id
+        set_newest_id(newest_id, storage)
 
     k1 = input("Enter topic 1 (not case sensitive): ")
-
-    if k1 in most_recent_tweets.text.lower():
-        print("Sending notification...")
-        message = client.messages.create(
-            to="+17326372256", 
-            from_="+19707164834",
-            body="""The account you are searching for has tweeted about a topic that you are interested in! 
-            Click the following link to be redirected to the tweet: https://twitter.com/{}}/status/""".format(user.username) + str(most_recent_tweets.tweet.id))
-
+    for tweet in most_recent_tweets.data:
+        if k1 in tweet.text.lower():
+            print("Sending notification...")
+            message = client.messages.create(
+                to="+17326372256", 
+                from_="+19707164834",
+                body="""The account you are searching for has tweeted about a topic that you are interested in!\n
+                This is the tweet: \n
+                {}\n
+                Click the following link to be redirected to the tweet: https://twitter.com/{}/status/""".format(tweet.text,user.data.username) + str(tweet.id))
+            print(message.sid)
+      
 while True:
     notif()
-    time.sleep(120) #sleeps for 2 days
+    time.sleep(30) #sleeps for 30 seconds
