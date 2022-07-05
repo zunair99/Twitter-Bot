@@ -14,4 +14,4 @@ This script will utilize the Twitter API through Tweepy, along with a SMS Messag
 * Replace bearer_token variable with your own Twitter BEARER TOKEN. Keep in mind that this script functions off Twitter API V2, using the BEARER_TOKEN. If you try to use one of twitter's other authentication methods, such as the combination of CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, and ACCESS_SECRET, the script will not function properly as certain methods of the API only apply to certain authentication methods. In addition, the scraping and data transformation being done is specific to the BEARER_TOKEN method and its subsidiary API request functions.
 * Replace to variable in the message component of the notif() function. This variable denotes the phone number that will be the recipient of these messages.
 
-* Two inputs will be requested to the user. One for the twitter handle of the account in question and another for the keyword that the user would like to search for.
+* Two inputs will be requested to the user in the console. One for the twitter handle of the account in question and another for the keyword that the user would like to search for.
